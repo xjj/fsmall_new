@@ -36,12 +36,12 @@ class Favorite extends Front {
 		if ($f){
 			echo json_encode(array(
 				'error' => -1,
-				'message' => '操作失败，该商品已在您的收藏夹中！',
+				'message' => '该商品已在您的收藏夹中！',
 			));
 			exit();
 		}
 		
-		$f = $favo -> add(array('uid' => $uid,'prd_id' => $prd_id));
+		$f = $favo -> add($uid, $prd_id);
 		if ($f > 0){
 			echo json_encode(array(
 				'error' => 0,
@@ -67,9 +67,8 @@ class Favorite extends Front {
 		
 		$page = intval($_GET['page']);
 		if ($page <= 0){$page = 1;}
-		$pagesize = 32;
+		$pagesize = 15;
 		
-		$uid = $_SESSION['uid'];
 		$user = new md\user();
 		$user_data = $user -> info($uid);
 		

@@ -1,6 +1,6 @@
 <{include file="common/header.tpl"}>
 <link type="text/css" rel="stylesheet" href="/images/<{$template}>/user.css" />
-<link type="text/css" rel="stylesheet" href="/images/<{$template}>/prd.css" />
+<link type="text/css" rel="stylesheet" href="/images/<{$template}>/product_common.css" />
 <link type="text/css" rel="stylesheet" href="/images/<{$template}>/favo.css" />
 
 <!--面包屑导航-->
@@ -12,20 +12,23 @@
 	<div class="sidebar">
 		<{include file="user/navbar.tpl"}>
 	</div>
-	<div class="mainbox clearfix">
-		<{if $prd_items}>
-		<{foreach $prd_items as $item}>
-		<div class="prd-item">
-			<a href="/product/<{$item.prd_id}>"><img src="<{$item.pic_thumb}>" width="260" height="260" class="prd-item-pic" /></a>
-			<div class="prd-item-title">
-				<a href="/product/<{$item.prd_id}>"><{$item.prd_name}></a>
-			</div>
-			<div class="prd-item-price">￥<{$item.sale_price|string_format:'%d'}></div>
-		</div>
-		<{/foreach}>
-		<{/if}>
+	<div class="mainbox">
+    	<div class="user-title">我的收藏夹</div>
+        <div class="prd-favos clearfix">
+            <{if $product_items}>
+            <{$is_favorite = 1}>
+            <{foreach $product_items as $item}>
+            	<{include file="product_item.tpl"}>
+            <{/foreach}>
+            <{/if}>
+            <{$pagebox}>
+        </div>
+        
 	</div>
-	
-	<{$pagebox}>
 </div>
+<script type="text/javascript">
+$(function(){
+		
+});
+</script>
 <{include file="common/footer.tpl"}>

@@ -8,6 +8,13 @@ namespace model;
  */
 class Cart extends Front {
 	
+	private $maxNumber = 99; 	//购物车商品的最多数量 
+	
+	function get_maxNumber(){
+		return $this -> maxNumber;	
+	}
+	
+	
 	//获取一条购物车商品信息
 	function info($cart_id){
 		if (!isint($cart_id) || $cart_id <= 0){return false;}
@@ -23,9 +30,14 @@ class Cart extends Front {
 	}
 	
 	//用户所有购物车信息
-	function items($uid, $grade_id){
+	function items($uid, $grade_id, $cartIdArr = array()){
 		if (!isint($uid) || $uid <= 0){return false;}
 		if (!isint($grade_id) || $grade_id <= 0){return false;}
+		if (!empty($cartIdArr) && is_array($cartIdArr)){
+			$where = ' AND cart.cart_id IN ('.implode(',', $cartIdArr).')';		
+		} else {
+			$where = '';
+		}
 		
 		$sql  = ' SELECT cart.*, ';
 		$sql .= ' prd.product_name, prd.product_name_kr, prd.product_sn, ';
@@ -34,7 +46,7 @@ class Cart extends Front {
 		$sql .= ' FROM `order_cart` cart ';
 		$sql .= ' LEFT JOIN `product_info` prd ON cart.prd_id = prd.prd_id ';
 		$sql .= ' LEFT JOIN `product_brand` brand ON prd.brand_id = brand.brand_id ';
-		$sql .= ' WHERE cart.uid = '.$uid.' AND cart.expired_time > '.time().' ';
+		$sql .= ' WHERE cart.uid = '.$uid.' AND cart.expired_time > '.time().' '.$where.'';
 		$sql .= ' ORDER BY cart.cart_id DESC';
 		$rows = $this -> db -> rows($sql);
 		if ($rows){
@@ -146,6 +158,12 @@ class Cart extends Front {
 		}
 	}
 	
+	//判断是否存在cart_id,判断选择商品是否存在
+	function isExistCartIds($uid, $cartids){
+		$sql = 'SELECT COUNT(*) AS num FROM `order_cart` WHERE uid = '.$uid.' AND cart_id IN ('.implode(',', $cartids).') AND expired_time > '.time();
+		return $this -> db -> row($sql);	
+	}
+	
 	//更新购物车商品价格 -- 该价格为实时计算得到的商品当前销售价格
 	function update_price($cart_id, $price){
 		if (!isint($cart_id) || $cart_id <= 0){return false;}
@@ -183,5 +201,12 @@ class Cart extends Front {
 		$time = time() + 24*3600;
 		$where = array('sku_id' => $sku_id, 'uid' => $uid);
 		return $this -> db -> update('order_cart', array('number' => $number, 'expired_time' => $time), $where);
+	}
+	
+	//查询购物车中商品总数
+	function product_total_number($uid){
+		$sql = 'SELECT SUM(number) as number FROM `order_cart` WHERE uid = '.$uid.' AND expired_time > '.time();
+		$row = $this -> db -> row($sql);
+		return $row['number'];	
 	}
 }

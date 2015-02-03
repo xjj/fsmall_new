@@ -23,6 +23,9 @@ class Order extends Front {
 		}
 		
 		$uid = $_SESSION['uid'];
+		$grade_id = $_SESSION['grade_id'];
+		
+		
 		$user = new md\user();
 		$user_data = $user -> info($uid);
 		$this -> smarty -> assign('user_data', $user_data);
@@ -32,9 +35,6 @@ class Order extends Front {
 			$status = 'all';
 		}
 		
-		$uid = $_SESSION['uid'];
-		$grade_id = $_SESSION['grade_id'];
-		
 		$page = intval($_GET['page']);
 		if ($page <= 0){$page = 1;}
 		$pagesize = 20;
@@ -42,10 +42,26 @@ class Order extends Front {
 		$k = trim($_GET['k']);
 		$params = array('uid' => $uid);
 		if (!empty($k)){$params['k'] = $k;}
-		$params['status'] = $this -> params[0];
+		$params['status'] = $status;
 		
 		$order = new md\order();
-		$ret = $order -> search_user_order($params, $page, $pagesize);
+		switch ($status){
+			case 'all':
+				$ret = $order -> user_order_all($params, $page, $pagesize);	
+				break;
+			case 'nopay':
+				$ret = $order -> user_order_nopay($params, $page, $pagesize);	
+				break;
+			case 'nosend':
+				$ret = $order -> user_order_nosend($params, $page, $pagesize);
+				break;
+			case '':
+				$ret = $order -> user_order_send($params, $page, $pagesize);
+				break;
+			case 'receive':
+				$ret = $order -> user_order_receive($params, $page, $pagesize);
+				break;
+		}
 		$order_items = $ret['items'];
 		$total = $ret['total'];
 		

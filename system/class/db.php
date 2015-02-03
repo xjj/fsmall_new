@@ -139,7 +139,7 @@ class DB {
 	}
 	
 	//删除数据
-	function delete($table, $condition, $limit = 0,$isdebug=false){
+	function delete($table, $condition, $limit = 0){
 		if (empty($condition)) {
 			$where = '1';
 		} elseif (is_array($condition)){
@@ -148,9 +148,6 @@ class DB {
 			$where = $condition;
 		}
 		$limit = $limit ? 'LIMIT 0,'.$limit : '';
-		if($isdebug==true){ 
-			echo "DELETE FROM `$table` WHERE $where $limit";  
-		}
 		return $this -> query("DELETE FROM `$table` WHERE $where $limit");
 	}
 	

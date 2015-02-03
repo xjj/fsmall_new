@@ -3,38 +3,39 @@ namespace shop;
 
 class index2 extends front {
 	
-	function indexxx(){
+	function index(){
 		$db = fetch_db_instance(1);
 		
-		$row = $db -> row('select arr FROM `ecs_tao` where tbcatid = 50000436 order by id ASC limit 0,1');	
+		$row = $db -> row('select arr FROM `ecs_tao` where tbcatid = 50010368 order by id ASC limit 0,1');	
 		$arr = $row['arr'];
 		$arr2 = eval("return {$arr};");
 		header('Content-type: text/html; charset=utf-8');
 		var_export($arr2);
 	}
 	
-	function updatexx(){
-		//$arr = 
+	function update(){
+	
 		//$arr = var_export($arr, true);
 		//$db = fetch_db_instance(1);
-		//$num = $db -> update('ecs_tao', array('arr' => $arr), array('tbcatid' => 50011746));
-		//var_dump($num);
+		//echo $db -> update('ecs_tao', array('arr' => $arr), array('tbcatid' => 50010368));
 	}
 	
-	function get(){
-		set_time_limit(0);
-		ini_set('memory_limit', '512M');
-
-		$goodsIdArr = array(250522,254506,259739,254913,267467,268714,250920,254499,268719,271421,296170,287327,282973,272491,274013,277888,275713,284819,287041,272147,278369,284755,292752,297252,298190,249802,253478,264026,287364,254509,287410,271461,275699,282973,287340,283727,298162,287374,255458,278832,258914,268714,254970,263726,286141);
+	
+	function spot(){
+		$db = fetch_db_instance(1);
+		$sql = 'SELECT g.goods_id, g.goods_hh, g.goods_name, g.goods_cn_name, g.goods_number, g.shop_price, kr.korea, g.goods_source_url FROM `ecs_goods` g INNER JOIN `ecs_goods_other` kr ON g.goods_id = kr.goods_id WHERE g.is_current = 1 and g.is_delete = 0 and g.is_on_sale = 1 ORDER BY g.goods_id DESC';
+		$grows = $db -> rows($sql);
+		if ($grows){
+			$goodsIdArr = array();
+			foreach ($grows as $row){
+				$goodsIdArr[] = $row['goods_id'];	
+			}
+		} else {
+			exit();	
+		}
 		
 		$goodsIdStr = implode(',', $goodsIdArr);
-		
-		$db = fetch_db_instance(1);
-		
-		//------------------------当前汇率--------------------------//
-		$sql = "select rate from ecs_goods_rate where 1";
-		$row = $db->row($sql);
-		$rate = $row['rate'];
+		//echo $goodsIdStr;
 		
 		//----------------------查询出销售属性类型--------------------//
 		$sql = "select attr_id, attr_name from ecs_attribute";
@@ -50,6 +51,11 @@ class index2 extends front {
 			}
 		}
 		
+		//------------------------当前汇率--------------------------//
+		$sql = "select rate from ecs_goods_rate where 1";
+		$row = $db->row($sql);
+		$rate = $row['rate'];
+		
 		//-----------------获取商品的销售属性值信息---------------------//
 		$sql = "select goods_attr_id, goods_id, attr_id, attr_value, attr_price from ecs_goods_attr where goods_id in ({$goodsIdStr})";
 		$rows = $db->rows($sql);
@@ -57,68 +63,88 @@ class index2 extends front {
 		foreach ($rows as $p){
 			$p['attr_value'] = $p['attr_value'];
 			if (in_array($p['attr_id'], $colorAttr)){
-				$groupedAttr[$p['goods_id']]['color'][] = array('attr_value'=>$p['attr_value'], 'attr_price'=>floatval($p['attr_price']/$rate), 'attr_price_kr' => $p['attr_price'] );
+				$groupedAttr[$p['goods_id']]['color'][] = array('attr_value'=>$p['attr_value'], 'attr_price'=>floatval($p['attr_price']/$rate) );
 			}elseif(in_array($p['attr_id'], $sizeAttr)){
-				$groupedAttr[$p['goods_id']]['size'][] = array('attr_value'=>$p['attr_value'], 'attr_price'=>floatval($p['attr_price']/$rate), 'attr_price_kr' => $p['attr_price'] );
+				$groupedAttr[$p['goods_id']]['size'][] = array('attr_value'=>$p['attr_value'], 'attr_price'=>floatval($p['attr_price']/$rate) );
 			}else{
-				$groupedAttr[$p['goods_id']]['other'][$p['attr_id']][] = array('attr_value'=>$p['attr_value'], 'attr_price'=>intval($p['attr_price']/$rate), 'attr_price_kr' => $p['attr_price'] );
+				$groupedAttr[$p['goods_id']]['other'][$p['attr_id']][] = array('attr_value'=>$p['attr_value'], 'attr_price'=>intval($p['attr_price']/$rate) );
 			}
 		}
-		
-		$sql = "select g.*, t.arr, ok.korea from ecs_goods g left join ecs_goods_tao t on g.goods_id = t.goods_id left join `ecs_goods_other` ok on g.goods_id = ok.goods_id where g.goods_id in ({$goodsIdStr})";
-		$rows = $db->rows($sql);
 		
 		$data = array();
-		
-		foreach ($rows as $item){
+		foreach ($grows as $row){
+			$skus = $this -> getSKUs($row['shop_price'],$groupedAttr[$row['goods_id']]['color'], $groupedAttr[$row['goods_id']]['size']);
 			
-			$groupdColors = $groupedAttr[$item['goods_id']]['color'];
-			$groupdSizes  = $groupedAttr[$item['goods_id']]['size'];
-			
-			$attribute = array();
-			foreach ($groupdColors as $colorArr){
-				foreach ($groupdSizes as $sizeArr){
-					$attribute[] = array(
-						'color' => $colorArr['attr_value'],
-						'size' => $sizeArr['attr_value'],
-						'price_kr' => $item['korea'] + $colorArr['attr_price_kr'] + $sizeArr['attr_price_kr'],
-						'price_cn' => $item['shop_price'] + $colorArr['attr_price'] + $sizeArr['attr_price'],	
-					);
-				}	
-			}
-			
-			$line = array();
-			$line['goods_id'] = $item['goods_id'];
-			$line['goods_name'] = $item['goods_name'];
-			$line['goods_name_cn'] = $item['goods_cn_name'];
-			$line['goods_img'] = $item['goods_img'];
-			$line['goods_hh'] = $item['goods_hh'];
-			$line['SKUs'] = $attribute; 
-			$line['description'] = $item['goods_desc'];
-			$line['detailPicture'] = $this -> fetchGoodsDetailPictures($item['goods_id']);
-			
-			$data[] = $line;
+			$data[] = array(
+				'goods_id' => $row['goods_id'],
+				'goods_name' => $row['goods_name'],
+				'goods_cn_name' => $row['goods_cn_name'],
+				'goods_hh' => $row['goods_hh'],
+				'shop_price' => $row['shop_price'],
+				'korea' => $row['korea'],
+				'source_url' => $row['goods_source_url'],
+				'skus' => $skus
+				
+			);	
 		}
-		$x = json_encode($data);
-		file_put_contents('fsdata_20150128.json', $x);
-		echo 'over';
+		//print_r($data);
+		//exit();
+		header("Content-type: application/vnd.ms-excel; charset=utf-8");
+		header("Content-Disposition: attachment; filename=current.xls");
+		echo $this -> print_excel($data);
+	
 	}
 	
-	function fetchGoodsDetailPictures($goods_id){
-		$db = fetch_db_instance(1);
-		$sql = 'SELECT * from `ecs_goods_pics` WHERE `goods_id` = '.$goods_id.' and `status` = 3  and `isdelete` = 0 order by pid asc';
-		$rows = $db -> rows($sql);
-		if ($rows){} else {
-			return false; 	
+	function getSKUs($shop_price, $colors, $sizes){
+		$data = array();
+		foreach ($colors as $color){
+			if (is_array($sizes)){
+				foreach ($sizes as $size){
+					$data[] = array(
+						'color' => $color['attr_value'],
+						'size' => $size['attr_value'],
+						'price' => $shop_price + $color['attr_price'] + $color['attr_price'],
+					);	
+				}	
+			} else {
+				$data[] = array(
+					'color' => $color['attr_value'],
+					'size' => '',
+					'price' => $shop_price + $color['attr_price'],
+				);	
+			}	
 		}
 		
-		$data = array();
-		foreach ($rows as $row){
-			if ($row['status'] == 3){
-				$data[] = 'http://img2.fs-mall.com/'.$row['pic_fs'];
-				
+		return $data;
+	}
+	
+	function print_excel($data){
+		$table = '<table border=1>';
+		foreach ($data as $row){
+			$count = count($row['skus']);
+			$table .= '<tr>';
+			$table .= '<td rowspan="'.$count.'">'.$row['goods_id'].'</td>';
+			$table .= '<td rowspan="'.$count.'">'.$row['goods_name'].'</td>';
+			$table .= '<td rowspan="'.$count.'">'.$row['goods_cn_name'].'</td>';
+			$table .= '<td rowspan="'.$count.'">'.$row['goods_hh'].'</td>';
+			$table .= '<td rowspan="'.$count.'">'.$row['source_url'].'</td>';
+			
+			$table .= '<td>'.$row['skus'][0]['color'].'</td>';
+			$table .= '<td>'.$row['skus'][0]['size'].'</td>';
+			$table .= '<td>'.$row['skus'][0]['price'].'</td>';
+			$table .= '</tr>';
+			if ($count > 1){
+				for ($i = 1; $i < $count; $i++){
+					$table .= '<tr>';	
+					$table .= '<td>'.$row['skus'][$i]['color'].'</td>';
+					$table .= '<td>'.$row['skus'][$i]['size'].'</td>';
+					$table .= '<td>'.$row['skus'][$i]['price'].'</td>';
+					$table .= '</tr>';
+				}	
 			}
 		}
-		return $data;
+		$table .=  '</table>';
+		
+		return $table;
 	}
 }

@@ -449,134 +449,6 @@ class Order extends Front {
 		return array('items' => $order_items, 'total' => $total);
 	}
 	
-	//订单查询 -- 用户订单列表
-	function search_user_order($params, $page, $pagesize){
-		$uid = intval($params['uid']);
-		
-		$k = trim($params['k']);
-		$status = trim($params['status']);
-		$status = strtolower($status);
-		
-		$where = 'WHERE op.uid = '.$uid.' AND o.is_delete = 0';
-		switch ($status){
-			case 'nopay': 	//待付款
-				$where .= ' AND o.order_status = 0 AND op.product_status = 0';
-				break;
-			case 'nosend': 	//待发货 -- 订单状态：已付款=1，已确认=2，已订货=3，部分发货=4；商品状态：已订货=1
-				$where .= ' AND o.order_status BETWEEN 1 AND 4 AND op.product_status = 1';
-				break;
-			case 'send': 	//待收货 -- 订单状态：部分发货=4，全发货=5；商品状态：韩方发货=4，国内到货=5，国内发货=6
-				$where .= ' AND o.order_status BETWEEN 4 AND 5 AND op.product_status BETWEEN 4 AND 6';
-				break;
-			case 'receive': //已收货 -- 订单状态：部分发货=4，全发货=5；商品状态：已收货=7
-				$where .= ' AND o.order_status BETWEEN 4 AND 5 AND op.product_status = 7';
-				break;
-		}
-		
-		if (!empty($k)){
-			if (isint($k)){
-				$where .= ' AND op.order_sn = '.$k.'';
-			} else {
-				$where .= ' AND (op.product_sn like \'%'.encode($k).'%\' OR o.consignee like \'%'.encode($k).'%\')';
-			}
-		}
-		
-		//查询订单
-		$sql  = ' SELECT op.*, ';
-		$sql .= ' o.order_status, o.consignee, o.add_time as order_add_time, o.pay_time, ';
-		$sql .= ' o.order_amount, o.shipping_fee,  o.refund_amount';
-		$sql .= ' FROM `order_product` op';
-		$sql .= ' LEFT JOIN `order_info` o ON op.order_id = o.order_id ';
-		$sql .= ' '.$where;
-		$sql .= ' ORDER BY op.order_id DESC ';
-		$sql .= ' LIMIT '.($page-1)*$pagesize.','.$pagesize;
-		
-		$rows = $this -> db -> rows($sql);
-		if ($rows){
-			$order_items = array();		//订单数据
-			$order_product = new order_product();
-			
-			//订单商品信息
-			foreach ($rows as $row){
-				$order_id = $row['order_id'];
-				if (!isset($order_item[$order_id])){
-					$order_status_text = $this -> fetch_order_status($row['order_status']);
-					$order_items[$order_id]['info'] = array(
-						'order_id' => $order_id,
-						'order_sn' => $row['order_sn'],
-						'order_status' => $row['order_status'],
-						'order_status_text' => $order_status_text,
-						'add_time' => $row['order_add_time'],
-						'consignee' => $row['consignee'],
-						'pay_time' => $row['pay_time'],
-						'order_amount' => format_money($row['order_amount']),
-						'refund_amount' => $row['refund_amount'],
-					);
-				}
-			}
-			
-			//获取订单商品信息
-			foreach ($rows as $row){
-				$order_id = $row['order_id'];
-				
-				$price = $row['price'];
-				$number = $row['number'];
-				$total_price = $price*$number;
-				
-				//判断订单中的商品是否可以取消 -- (未付款) 或 (已订货 10天未发货的)
-				$time = time() - ($row['order_time'] + 10 * 24 * 3600);
-				if (($row['order_status'] == 0 && $row['product_status'] == 0) || ($row['order_status'] == 3 && $time > 0 && $row['product_status'] == 1)){
-					$cancle_abled = 1; //可以取消
-				} else {
-					$cancle_abled = 0;	//不可以
-				}
-				
-				//判断商品是否可以退换货 -- (货物已收货 并且 不是不可退换货的商品)
-				//国内货时间10天内
-				$time = time() - 10*24*3600;
-				if (($row['product_status'] == 6 || $row['product_status'] == 7)  && $row['sendtime'] > $time && $row['is_no_refund'] == 0){
-					$refund_abled = 1;	//可申请退换
-				} else {
-					$refund_abled = 0;	//不可申请
-				}
-				
-				$order_items[$order_id]['items'][] = array(
-					'op_id' => $row['op_id'],
-					'order_id' => $row['order_id'],
-					'order_sn' => $row['order_sn'],
-					'product_name' => $row['product_name'],
-					'product_sn' => $row['product_sn'],
-					'prd_id' => $row['prd_id'],
-					'sku_id' => $row['sku_id'],
-					'product_status' => $row['product_status'],
-					'product_status_text' => $order_product -> fetch_product_status($row['product_status']),
-					'number' => $row['number'],
-					'price' => format_money($price),
-					'total_price' => format_money($total_price),
-					'order_amount' => format_money($row['order_amount']),
-					'pic_thumb' => $row['pic_thumb'],
-					'pic_small' => $row['pic_small'],
-					'prop_value' => unserialize($row['prop_value']),
-					'cancle_abled' => $cancle_abled,
-					'refund_abled' => $refund_abled,
-					'refund_status' => $row['refund_status']
-				);
-			}
-		} else {
-			$order_items = false;
-		}
-		
-		//查询订单商品总数
-		$sql  = ' SELECT op.op_id FROM `order_product` op';
-		$sql .= ' LEFT JOIN `order_info` o ON op.order_id = o.order_id ';
-		$sql .= ' '.$where;
-		
-		$sql = 'SELECT COUNT(*) AS num FROM ('.$sql.') X';
-		$row = $this -> db -> row($sql);
-		$total = $row['num'];
-		
-		return array('items' => $order_items, 'total' => $total);
-	}
 	
 	//取消订单 -- 仅仅未付款的订单才可以取消
 	function cancle($order_id){
@@ -683,5 +555,325 @@ class Order extends Front {
 		), array(
 			'order_id' => $order_id
 		));
+	}
+	
+	//订单查询 -- 用户订单列表
+	function search_user_order($params, $page, $pagesize){
+		$uid = intval($params['uid']);
+		
+		$k = trim($params['k']);
+		$status = trim($params['status']);
+		$status = strtolower($status);
+		
+		$where = 'WHERE op.uid = '.$uid.' AND o.is_delete = 0 ';
+		switch ($status){
+			case 'nopay': 	//待付款
+				$where .= ' AND o.order_status = 0 AND op.product_status = 0';
+				break;
+			case 'nosend': 	//待发货 -- 订单状态：已付款=1，已确认=2，已订货=3; 商品状态：已订货=1
+				$where .= ' AND o.order_status BETWEEN 1 AND 3 AND op.product_status = 1';
+				break;
+			case 'send': 	//待收货 -- 订单状态：部分发货=4，全发货=5；商品状态：韩方发货=4，国内到货=5，国内发货=6
+				$where .= ' AND o.order_status BETWEEN 4 AND 5 AND op.product_status BETWEEN 4 AND 6';
+				break;
+			case 'receive': //已收货 -- 订单状态：部分发货=4，全发货=5；商品状态：已收货=7
+				$where .= ' AND o.order_status BETWEEN 4 AND 5 AND op.product_status = 7';
+				break;
+		}
+		
+		if (!empty($k)){
+			$where .= ' AND (op.order_sn LIKE \'%'.encode($k).'%\' OR op.product_sn like \'%'.encode($k).'%\' OR o.consignee like \'%'.encode($k).'%\')';
+		}
+		
+		//查询订单
+		$sql  = ' SELECT op.*, ';
+		$sql .= ' o.order_status, o.consignee, o.add_time as order_add_time, o.pay_time, ';
+		$sql .= ' o.order_amount, o.shipping_fee,  o.refund_amount';
+		$sql .= ' FROM `order_product` op';
+		$sql .= ' LEFT JOIN `order_info` o ON op.order_id = o.order_id ';
+		$sql .= ' '.$where;
+		$sql .= ' ORDER BY op.order_id DESC ';
+		$sql .= ' LIMIT '.($page-1)*$pagesize.','.$pagesize;
+		
+		
+	}
+	
+	//用户所有订单
+	function user_order_all($params, $page, $pagesize){
+		$uid = intval($params['uid']);
+		
+		$k = trim($params['k']);
+		$status = trim($params['status']);
+		$status = strtolower($status);
+		
+		$where = 'WHERE op.uid = '.$uid.' AND o.is_delete = 0 ';
+		if (!empty($k)){
+			$where .= ' AND (op.order_sn LIKE \'%'.encode($k).'%\' OR op.product_sn LIKE \'%'.encode($k).'%\' OR o.consignee LIKE \'%'.encode($k).'%\')';
+		}
+		
+		//查询订单
+		$sql  = ' SELECT op.*, ';
+		$sql .= ' o.order_status, o.consignee, o.add_time as order_add_time, o.pay_time, ';
+		$sql .= ' o.order_amount, o.shipping_fee, o.refund_amount ';
+		$sql .= ' FROM `order_product` op ';
+		$sql .= ' LEFT JOIN `order_info` o ON op.order_id = o.order_id ';
+		$sql .= ' '.$where;
+		$sql .= ' ORDER BY op.order_id DESC ';
+		$sql .= ' LIMIT '.($page-1)*$pagesize.','.$pagesize;
+		
+		$result = $this -> db -> rows($sql);
+		$order_items = $this -> user_order_detail($result);
+		
+		//查询订单商品总数
+		$sql  = ' SELECT op.op_id FROM `order_product` op';
+		$sql .= ' LEFT JOIN `order_info` o ON op.order_id = o.order_id ';
+		$sql .= ' '.$where;
+		
+		$sql = 'SELECT COUNT(*) AS num FROM ('.$sql.') X';
+		$row = $this -> db -> row($sql);
+		$total = $row['num'];
+		
+		return array('items' => $order_items, 'total' => $total);
+	} 
+	
+	//用户未付款订单
+	function user_order_nopay($params, $page, $pagesize){
+		$uid = intval($params['uid']);
+		$k = trim($params['k']);
+		$status = trim($params['status']);
+		$status = strtolower($status);
+		
+		$where = 'WHERE op.uid = '.$uid.' AND o.is_delete = 0 AND o.order_status = 0 AND op.product_status = 0';
+		if (!empty($k)){
+			$where .= ' AND (op.order_sn LIKE \'%'.encode($k).'%\' OR op.product_sn LIKE \'%'.encode($k).'%\' OR o.consignee LIKE \'%'.encode($k).'%\')';
+		}
+		
+		//查询订单
+		$sql  = ' SELECT op.*, ';
+		$sql .= ' o.order_status, o.consignee, o.add_time as order_add_time, o.pay_time, ';
+		$sql .= ' o.order_amount, o.shipping_fee, o.refund_amount ';
+		$sql .= ' FROM `order_product` op';
+		$sql .= ' LEFT JOIN `order_info` o ON op.order_id = o.order_id ';
+		$sql .= ' '.$where;
+		$sql .= ' ORDER BY op.order_id DESC ';
+		$sql .= ' LIMIT '.($page-1)*$pagesize.','.$pagesize;
+		
+		$result = $this -> db -> rows($sql);
+		$order_items = $this -> user_order_detail($result);
+		
+		//查询订单商品总数
+		$sql  = ' SELECT op.op_id FROM `order_product` op';
+		$sql .= ' LEFT JOIN `order_info` o ON op.order_id = o.order_id ';
+		$sql .= ' '.$where;
+		
+		$sql = 'SELECT COUNT(*) AS num FROM ('.$sql.') X';
+		$row = $this -> db -> row($sql);
+		$total = $row['num'];
+		
+		return array('items' => $order_items, 'total' => $total);	
+	}
+	
+	//待发货订单
+	function user_order_nosend($params, $page, $pagesize){
+		$uid = intval($params['uid']);
+		$k = trim($params['k']);
+		$status = trim($params['status']);
+		$status = strtolower($status);
+		
+		$where = 'WHERE op.uid = '.$uid.' AND bc.status = 0 ';
+		if (!empty($k)){
+			$where .= ' AND (op.order_sn LIKE \'%'.encode($k).'%\' OR op.product_sn LIKE \'%'.encode($k).'%\' OR o.consignee LIKE \'%'.encode($k).'%\')';
+		}
+		
+		//查询订单
+		$sql  = ' SELECT op.*, COUNT(bc.op_id) as order_number, ';
+		$sql .= ' o.order_status, o.consignee, o.add_time as order_add_time, o.pay_time, ';
+		$sql .= ' o.order_amount, o.shipping_fee, o.refund_amount ';
+		$sql .= ' FROM `order_product_barcode` bc ';
+		$sql .= ' LEFT JOIN `order_product` op ON bc.op_id = op.op_id ';
+		$sql .= ' LEFT JOIN `order_info` o ON bc.order_id = o.order_id ';
+		$sql .= ' '.$where;
+		$sql .= ' GROUP BY bc.order_id, bc.op_id';
+		$sql .= ' ORDER BY bc.order_id DESC ';
+		$sql .= ' LIMIT '.($page-1)*$pagesize.','.$pagesize;
+		
+		$result = $this -> db -> rows($sql);
+		$order_items = $this -> user_order_detail($result);
+		
+		//查询订单商品总数
+		$sql  = ' SELECT bc.op_id ';
+		$sql .= ' FROM `order_product_barcode` bc ';
+		$sql .= ' LEFT JOIN `order_product` op ON bc.op_id = op.op_id ';
+		$sql .= ' LEFT JOIN `order_info` o ON bc.order_id = o.order_id ';
+		$sql .= ' '.$where;
+		$sql .= ' GROUP BY bc.order_id, bc.op_id';
+		
+		$sql = 'SELECT COUNT(*) AS num FROM ('.$sql.') X';
+		$row = $this -> db -> row($sql);
+		$total = $row['num'];
+		
+		return array('items' => $order_items, 'total' => $total);
+	}
+	
+	//已发货订单
+	function user_order_send($params, $page, $pagesize){
+		$uid = intval($params['uid']);
+		$k = trim($params['k']);
+		$status = trim($params['status']);
+		$status = strtolower($status);
+		
+		$where = 'WHERE op.uid = '.$uid.' AND bc.status BETWEEN 1 AND 3 ';
+		if (!empty($k)){
+			$where .= ' AND (op.order_sn LIKE \'%'.encode($k).'%\' OR op.product_sn LIKE \'%'.encode($k).'%\' OR o.consignee LIKE \'%'.encode($k).'%\')';
+		}
+		
+		//查询订单
+		$sql  = ' SELECT op.*, COUNT(bc.op_id) as order_number, ';
+		$sql .= ' o.order_status, o.consignee, o.add_time as order_add_time, o.pay_time, ';
+		$sql .= ' o.order_amount, o.shipping_fee, o.refund_amount ';
+		$sql .= ' FROM `order_product_barcode` bc ';
+		$sql .= ' LEFT JOIN `order_product` op ON bc.op_id = op.op_id ';
+		$sql .= ' LEFT JOIN `order_info` o ON bc.order_id = o.order_id ';
+		$sql .= ' '.$where;
+		$sql .= ' GROUP BY bc.order_id, bc.op_id';
+		$sql .= ' ORDER BY op.order_id DESC ';
+		$sql .= ' LIMIT '.($page-1)*$pagesize.','.$pagesize;
+		
+		$result = $this -> db -> rows($sql);
+		$order_items = $this -> user_order_detail($result);
+		
+		//查询订单商品总数
+		$sql  = ' SELECT bc.op_id ';
+		$sql .= ' FROM `order_product_barcode` bc ';
+		$sql .= ' LEFT JOIN `order_product` op ON bc.op_id = op.op_id ';
+		$sql .= ' LEFT JOIN `order_info` o ON bc.order_id = o.order_id ';
+		$sql .= ' '.$where;
+		$sql .= ' GROUP BY bc.order_id, bc.op_id';
+		
+		$sql = 'SELECT COUNT(*) AS num FROM ('.$sql.') X';
+		$row = $this -> db -> row($sql);
+		$total = $row['num'];
+		
+		return array('items' => $order_items, 'total' => $total);		
+	}
+	
+	
+	//已签收订单
+	function user_order_receive($params, $page, $pagesize){
+		$uid = intval($params['uid']);
+		$k = trim($params['k']);
+		$status = trim($params['status']);
+		$status = strtolower($status);
+		
+		$where = 'WHERE op.uid = '.$uid.' AND bc.status = 4 ';
+		if (!empty($k)){
+			$where .= ' AND (op.order_sn LIKE \'%'.encode($k).'%\' OR op.product_sn LIKE \'%'.encode($k).'%\' OR o.consignee LIKE \'%'.encode($k).'%\')';
+		}
+		
+		//查询订单
+		$sql  = ' SELECT op.*, COUNT(bc.op_id) as order_number, ';
+		$sql .= ' o.order_status, o.consignee, o.add_time as order_add_time, o.pay_time, ';
+		$sql .= ' o.order_amount, o.shipping_fee, o.refund_amount ';
+		$sql .= ' FROM `order_product_barcode` bc ';
+		$sql .= ' LEFT JOIN `order_product` op ON bc.op_id = op.op_id ';
+		$sql .= ' LEFT JOIN `order_info` o ON bc.order_id = o.order_id ';
+		$sql .= ' '.$where;
+		$sql .= ' GROUP BY bc.order_id, bc.op_id';
+		$sql .= ' ORDER BY op.order_id DESC ';
+		$sql .= ' LIMIT '.($page-1)*$pagesize.','.$pagesize;
+		
+		$result = $this -> db -> rows($sql);
+		$order_items = $this -> user_order_detail($result);
+		
+		//查询订单商品总数
+		$sql  = ' SELECT bc.op_id ';
+		$sql .= ' FROM `order_product_barcode` bc ';
+		$sql .= ' LEFT JOIN `order_product` op ON bc.op_id = op.op_id ';
+		$sql .= ' LEFT JOIN `order_info` o ON bc.order_id = o.order_id ';
+		$sql .= ' '.$where;
+		$sql .= ' GROUP BY bc.order_id, bc.op_id';
+		
+		$sql = 'SELECT COUNT(*) AS num FROM ('.$sql.') X';
+		$row = $this -> db -> row($sql);
+		$total = $row['num'];
+		
+		return array('items' => $order_items, 'total' => $total);	
+	}
+	
+	//获取用户订单信息
+	function user_order_detail($result){
+		if ($result){} else {return false;}
+		
+		$order_items = array();	
+		$order_product = new order_product();
+		
+		//订单商品信息
+		foreach ($result as $row){
+			$order_id = $row['order_id'];
+			if (!isset($order_item[$order_id])){
+				$order_status_text = $this -> fetch_order_status($row['order_status']);
+				$order_items[$order_id]['info'] = array(
+					'order_id' => $order_id,
+					'order_sn' => $row['order_sn'],
+					'order_status' => $row['order_status'],
+					'order_status_text' => $order_status_text,
+					'add_time' => $row['order_add_time'],
+					'consignee' => $row['consignee'],
+					'pay_time' => $row['pay_time'],
+					'order_amount' => format_money($row['order_amount']),
+					'refund_amount' => $row['refund_amount'],
+				);
+			}
+		}
+		
+		//获取订单商品信息
+		foreach ($result as $row){
+			$order_id = $row['order_id'];
+			
+			$price = $row['price'];
+			$number = $row['number'];
+			$total_price = $price*$number;
+			
+			//判断订单中的商品是否可以取消 -- (未付款) 或 (已订货 10天未发货的)
+			$time = time() - ($row['order_time'] + 10 * 24 * 3600);
+			if (($row['order_status'] == 0 && $row['product_status'] == 0) || ($row['order_status'] == 3 && $time > 0 && $row['product_status'] == 1)){
+				$cancle_abled = 1; //可以取消
+			} else {
+				$cancle_abled = 0;	//不可以
+			}
+			
+			//判断商品是否可以退换货 -- (货物已收货 并且 不是不可退换货的商品)
+			//国内货时间10天内
+			$time = time() - 10*24*3600;
+			if (($row['product_status'] == 6 || $row['product_status'] == 7)  && $row['sendtime'] > $time && $row['is_no_refund'] == 0){
+				$refund_abled = 1;	//可申请退换
+			} else {
+				$refund_abled = 0;	//不可申请
+			}
+			
+			$order_items[$order_id]['items'][] = array(
+				'op_id' => $row['op_id'],
+				'order_id' => $row['order_id'],
+				'order_sn' => $row['order_sn'],
+				'product_name' => $row['product_name'],
+				'product_sn' => $row['product_sn'],
+				'prd_id' => $row['prd_id'],
+				'sku_id' => $row['sku_id'],
+				'product_status' => $row['product_status'],
+				'product_status_text' => $order_product -> fetch_product_status($row['product_status']),
+				'number' => $row['number'],
+				'price' => format_money($price),
+				'total_price' => format_money($total_price),
+				'order_amount' => format_money($row['order_amount']),
+				'pic_thumb' => $row['pic_thumb'],
+				'pic_small' => $row['pic_small'],
+				'prop_value' => unserialize($row['prop_value']),
+				'cancle_abled' => $cancle_abled,
+				'refund_abled' => $refund_abled,
+				'refund_status' => $row['refund_status']
+			);
+		}
+		
+		return $order_items;
 	}
 }

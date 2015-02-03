@@ -48,6 +48,66 @@ class Cart extends Front {
 		$this -> smarty -> display('user/cart.tpl');
 	}
 	
+	//设置选择的购物车商品
+	function checked(){
+		if (!$this -> islogin){
+			echo json_encode(array(
+				'error' => -1,
+				'message' => '您需要登录，才能进行这项操作！'
+			));
+			exit();
+		}
+		
+		$cart_id = trim($_POST['cart_id']);
+		$uid = $_SESSION['uid'];
+		
+		$f = false;
+		if (empty($cart_id)){
+			$f = true;
+		} else {
+			$cartIdArr = explode(',', $cart_id);
+			$ids = array();
+			foreach ($cartIdArr as $cartId){
+				if (isint($cartId) && $cartId > 0){
+					$ids[] = $cartId;	
+				}	
+			} 
+			
+			if (empty($ids)){
+				$f = true;	
+			}
+		}
+		
+		if ($f){
+			echo json_encode(array(
+				'error' => -1,
+				'message' => '您没有选择任何商品！'
+			));	
+			exit();
+		}
+		
+		//检查商品是否都在购物车中
+		$cart = new md\cart();
+		$num = $cart -> isExistCartIds($uid, $ids);
+		if ($num < count($ids)){
+			echo json_encode(array(
+				'error' => -1,
+				'message' => '数据异常请重新提交！'
+			));	
+			exit();
+		}
+		
+		$idStr = implode('|', $ids);
+		$code  = md5($idStr);
+		$_SESSION['cart_id'] = $ids;
+		$_SESSION['cart_verify'] = $code;
+		
+		echo json_encode(array(
+			'error' => 0,
+			'code' => $code
+		));
+	}
+	
 	//商品加入购物车
 	function add_to_cart(){
 		if (!$this -> islogin){
@@ -121,10 +181,23 @@ class Cart extends Front {
 			exit();
 		}
 		
+		$uid = $_SESSION['uid'];
+		
 		$cart = new md\cart();
 		
+		//判断是否超出购物车上限
+		$maxNumber = $cart -> get_maxNumber();
+		$totalNumber = $cart -> product_total_number($uid);
+		if ($totalNumber + $number > $maxNumber){
+			echo json_encode(array(
+				'error' => -1,
+				'message' => '购物车最多仅能存放'.$maxNumber.'件商品！'
+			));	
+		}
+		
+		
 		//获取购物车内是否有该商品信息
-		$cart_data = $cart -> get_info_by_SKU($_SESSION['uid'], $sku_id);
+		$cart_data = $cart -> get_info_by_SKU($uid, $sku_id);
 		if ($cart_data){
 			$number = $cart_data['number'] + $number;
 		} else {
@@ -310,8 +383,16 @@ class Cart extends Front {
 			exit();
 		}
 		
+		$c = $_GET['c'];
 		$uid = $_SESSION['uid'];
 		$grade_id = $_SESSION['grade_id'];
+		
+		//验证选择的商品
+		if (empty($c) || $c != $_SESSION['cart_verify'] || empty($_SESSION['cart_id'])){
+			cpmsg(false, '请求地址错误，请重新选择商品！', '/cart');	
+		}
+		
+		$cartIdArr = $_SESSION['cart_id'];
 		
 		//清理掉过期的商品
 		$cart = new md\cart();
@@ -322,7 +403,7 @@ class Cart extends Front {
 		
 		//查询购物车信息
 		$total_number = $total_price = $total_weight = 0;
-		$cart_items = $cart -> items($uid, $grade_id);
+		$cart_items = $cart -> items($uid, $grade_id, $cartIdArr);
 		if ($cart_items){
 			foreach ($cart_items as $item){
 				$total_number += $item['number'];

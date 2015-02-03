@@ -7,21 +7,6 @@ if (!defined('START')) exit('No direct script access allowed.');
  +----------------------------------
  */
 
-// 调试用的函数 xjj  正式部署时删除
-function dump($a){
-	var_dump($a); 
-	echo '<hr>';
-}
-function dumpd($a){
-	var_dump($a); 
-	echo '<hr>';
-	die;
-}
-
-function tdump($a){
-	file_put_contents(UPLOAD_PATH.'/test.txt', var_export($a,true),FILE_APPEND);
-}
-/**************************核心函数*********************/
 //自动加载类文件
 function autoload($className){
 	load_class($className);

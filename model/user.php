@@ -26,7 +26,7 @@ class User extends Front {
 	//获取头像
 	function headUrl($path, $width){
 		if (empty($path)){
-			return '/images/head.png';
+			return '/images/userhead.jpg';
 		}
 		$pic = new picture();
 		return $pic -> thumb_url($path, $width, $width);

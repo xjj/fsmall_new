@@ -5,7 +5,7 @@ use model as md;
 /*
 --------------------------------
 	淘宝 OAuth2.0 SDK
-	张国夫 xjj
+	张国夫
 	2014.1.22  c197cb955f544657ccce6bc94a6c9320
 --------------------------------
 */
@@ -18,6 +18,10 @@ class taobaooauth extends Front{
 	public $authorizeURL 	= 'https://oauth.taobao.com/authorize';
 	public $accessTokenUrl	= 'https://oauth.taobao.com/token';
 	public $apiUrlHttp		= 'http://gw.api.taobao.com/router/rest';
+	
+	/*function __construct(){
+		echo '@@';
+	}	*/
 	//
 	function get_access_token_info($taobao_user_id = 60452186){
 		$tb_oauth = new md\tb_oauth();
@@ -30,6 +34,7 @@ class taobaooauth extends Front{
 			return false;
 		}
 	}
+	
 	//获取授权access_token 60452186 为淘宝帐号curlbe的ID
 	function get_access_token($taobao_user_id = 60452186){
 		//echo 11;
@@ -61,6 +66,7 @@ class taobaooauth extends Front{
 		$url = $this -> authorizeURL.'?'.http_build_query($params);
 		return $url;
 	}
+	
 	/*
 	---------------------------------------
 		获取请求授权令牌的地址
@@ -81,6 +87,7 @@ class taobaooauth extends Front{
 		
 		return json_decode($rt, true);
 	}
+	
 	/*
 	---------------------------------------
 		刷新授权令牌的地址
@@ -100,6 +107,8 @@ class taobaooauth extends Front{
 		
 		return json_decode($rt, true);
 	}
+	
+	
 	/*
 	-------------------------------------
 		发送请求
@@ -123,11 +132,12 @@ class taobaooauth extends Front{
 		$url = $this -> apiUrlHttp;
 		
 		$rt = $this -> request($url, $params, $method, $multi);
-		file_put_contents(UPLOAD_PATH.'/test.txt', var_export(array($url,$params,$method,$multi),true),FILE_APPEND);
         $rt = iconv("utf-8", "utf-8//ignore", $rt); 		//UTF-8转码
 		
 		return json_decode($rt, true);
 	}
+	
+	
 	/*
 	-------------------------------------
 		 HTTP/HTTPS请求操作 ---- CURL(需要开启)
@@ -181,10 +191,13 @@ class taobaooauth extends Front{
         curl_close($ci);
         return $response;
 	}
+	
+	
 	//上传图片到空间
 	function upload($pic){
+		global $_save_dir;
 		
-		$savedir = UPLOAD_PATH .'/details/';
+		$savedir = $_save_dir .'/details/';
 		$title = str_replace($savedir, '', $pic);
 		$title = str_replace('/', '-', $title);
  		
@@ -195,9 +208,12 @@ class taobaooauth extends Front{
 			'image_input_title' => $title,
 			'img' => '@'.$pic
         );
+		
+		
 		$resp = $this -> api($params, 'POST', true);	
 		return $resp;
 	}
+	
 	//签名
 	function generateSign($params) {
 		ksort($params);
@@ -213,6 +229,8 @@ class taobaooauth extends Front{
 
 		return strtoupper(md5($stringToBeSigned));
 	}
+
+	
 	//更新access_toekn
 	function update_access_token($data){
 		$db = getdb();
@@ -226,6 +244,7 @@ class taobaooauth extends Front{
 			'taobao_user_id' => $data['taobao_user_id']
 		));
 	}
+	
 	//新建access_toekn
 	function add_access_token($data){
 		$db = getdb();

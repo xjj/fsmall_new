@@ -848,152 +848,18 @@ class Product extends adm\Front {
 		return false;
 	}
 	
-	//图片列表 查询操作 xjj  
+	//图片列表
 	function pics(){
 		
 		$page = intval($_GET['page']);
 		$page = $page < 1 ? 1 : $page;
 		$pagesize = 20;
 		$prd_id = $this -> params[1];
-		
-		//查已确认图
+		/*查是否已确认  已确认显示图片  未确认 抓图  确认 然后 倒过去    抓图是写入到 */
 		$product_pics = new md\product_pics();
 		$ret = $product_pics -> search(array('prd_id'=>$prd_id,'is_confirm'=>1));
-		
-		//查未确认图
-		$ret2 = $product_pics -> search_img2(array('prd_id'=>$prd_id,'is_confirm'=>0));
-		//dump($ret2);
 		$this -> smarty -> assign('items', $ret['items']);
-		$this -> smarty -> assign('items_unconfirm', $ret2['items']);
 		$this -> smarty -> assign('title', '商品图片详情');
 		$this -> smarty -> display('product/product_pics_list.tpl');
-	}
-	//图片 删除 操作 xjj  
-	function pic_del($pic_id_array=0){
-		//dumpd($this -> params );
-		$pic_id = $this -> params[1];
-		if($pic_id_array>0 ){ 
-			$pic_id =$pic_id_array;
-		}
-		if (!isint($pic_id) || $pic_id <= 0){
-			cpmsg(false, '错误的请求！', -1);
-		}
-		$product_pics = new md\product_pics();
-		$f = $product_pics -> pic_del_img2($pic_id);
-		if ($f){
-			cpmsg(true, '操作成功！', -1);
-		} else {
-			//dump($f); echo mysql_error();
-			cpmsg(false, '操作失败！', -1);
-		}
-	}
-		//图片 批量删除 
-	function pic_del_multi($data=0){
-		$code=0;
-		if(isset($_REQUEST['pic_id'] )&&!empty($_REQUEST['pic_id'] )||is_array($data)){
-			$pic_ids=  $_REQUEST['pic_id'];
-			if(is_array($data) ){$pic_ids=$data;  }
-			$str=' pic_id in ( ';
-			foreach($pic_ids as $v ){
-				$str .=intval($v).',';	
-			}
-			$str = trim($str,',').') ';
-			$product_pics = new md\product_pics();
-			$f = $product_pics -> pic_del_img2_multi($str);
-			if ($f){
-				$code=1;
-				$msg='操作成功';
-			} else {
-				$msg='操作失败';
-			}	
-		}else{
-			$msg='参数不正确';
-			
-		}
-		echo json_encode(array('code'=>$code,'msg'=>$msg)); 
-	}
-		//图片  确认  
-	function pic_confirm(){
-		$pic_id = $this -> params[1];
-		if (!isint($pic_id) || $pic_id <= 0){
-			cpmsg(false, '错误的请求！', -1);
-		}
-		$condition= array('pic_id'=> $pic_id);
-		$product_pics = new md\product_pics();
-		$f = $product_pics -> search_img2($condition);
-		#插入fs图片表
-		$r = $product_pics -> add($f);
-		if($r){
-			$this->pic_del($pic_id);
-		}else{
-			cpmsg(false, '操作失败！', -1);
-		}
-
-	}
-			//图片批量  确认  
-	function pic_confirm_multi(){
-		$code=0; 
-		$msg='操作失败';
-		if(isset($_REQUEST['pic_id'] )&&!empty($_REQUEST['pic_id'] )){
-			$pic_ids=  $_REQUEST['pic_id'];
-			$str=' pic_id in ( ';
-			foreach($pic_ids as $v ){
-				$str .=intval($v).',';	
-			}
-			$str = trim($str,',').') ';
-			$product_pics = new md\product_pics();
-			$f = $product_pics -> search_img2($pic_ids);
-			#插入fs图片表
-			$r = $product_pics -> add($f);
-			if($r){
-				$this->pic_del_multi($$pic_ids);
-				die;
-			}
-		}else{
-			$msg='参数不正确';
-		}
-		echo json_encode(array('code'=>$code,'msg'=>$msg));
-	}
-		//图片 删除fs上的
-	function pic_local_del($pic_id_array=0){
-		$pic_id = intval($this -> params[1]);
-		if($pic_id_array>0 ){ 
-			$pic_id = intval($pic_id_array);
-		}
-		if (!isint($pic_id) || $pic_id <= 0){
-			cpmsg(false, '错误的请求！', -1);
-		}
-		$product_pics = new md\product_pics();
-		$f = $product_pics -> pic_local_del($pic_id);
-		if ($f){
-			cpmsg(true, '操作成功！', -1);
-		} else {
-			cpmsg(false, '操作失败！', -1);
-		}
-	}
-	//图片批量 删除fs上的
-	function pic_local_del_multi($data=0){
-		$code=0;
-		if(isset($_REQUEST['pic_id'] )&&!empty($_REQUEST['pic_id'] )||is_array($data)){
-			$pic_ids=  $_REQUEST['pic_id'];
-			if(is_array($data) ){$pic_ids=$data;  }
-			$str=' pic_id in ( ';
-			foreach($pic_ids as $v ){
-				$str .=intval($v).',';	
-			}
-			$str = trim($str,',').') ';
-			$product_pics = new md\product_pics();
-			$f = $product_pics -> pic_del_local_multi($str);
-			if ($f){
-				$code=1;
-				$msg='操作成功';
-			} else {
-				$msg='操作失败';
-			}	
-		}else{
-			$msg='参数不正确';
-			
-		}
-		echo json_encode(array('code'=>$code,'msg'=>$msg)); 
 	}
 }

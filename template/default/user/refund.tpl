@@ -3,7 +3,7 @@
 
 <!--面包屑导航-->
 <div class="breadcrumb wrap">
-	<a href="/">首页</a><span>&gt;</span><a href="/user">会员中心</a><span>&gt;</span><a href="/user/change_or_return">退换货明细</a>
+	<a href="/">首页</a><span>&gt;</span>退换货明细
 </div>
 
 <div class="wrap clearfix">
@@ -11,10 +11,10 @@
 		<{include file="user/navbar.tpl"}>
 	</div>
 	<div class="mainbox">
+    	<div class="user-title">退换货明细</div>
 		<table width="100%" border="0" cellspacing="0" cellpadding="0" class="tbl">
 		  <tr>
 		  	<th>订单号</th>
-            <th>商品条码</th>
 			<th>商品编号</th>
 			<th>退货类型</th>
 			<th>审核状态</th>
@@ -24,7 +24,6 @@
 		  </tr>
 		  <tr>
 		  	<td>2014052032736</td>
-            <td>2548755</td>
 			<td>yubsshop-25481</td>
 			<td>质量问题</td>
 			<td>待处理</td>

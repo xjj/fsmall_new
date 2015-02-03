@@ -16,6 +16,9 @@
         <span class="hot"></span>
         <span class="new"></span>
         <span class="spot"></span>
+        <{if $is_favorite}>
+        	<a href="javascript:;" data-href="/favorite/del/<{$item.prd_id}>" class="btn-cancle-favo">取消收藏</a>
+        <{/if}>
     </div>
 </div>
 <{/if}>

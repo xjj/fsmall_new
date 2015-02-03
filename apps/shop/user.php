@@ -41,7 +41,7 @@ class User extends Front {
 	
 	//个人中心首页
 	function index(){
-		$this -> profile();	
+		$this -> smarty -> display('user/index.tpl');	
 	}
 	
 	//帐号资料

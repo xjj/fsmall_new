@@ -73,13 +73,4 @@ class User extends Front {
 		$otherlogin = new user\otherlogin();
 		$otherlogin -> $p();
 	}
-	
-	//批发会员审核
-	function upgrade(){
-		$p = $this -> params[0];
-		$ps = array('items', 'agree','disagree');
-		if (!in_array($p, $ps)){$p = 'items';}
-		$upgrade = new user\upgrade();
-		$upgrade -> $p();
-	}
 }

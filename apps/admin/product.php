@@ -7,7 +7,7 @@ use admin\product as product;
 
 /**
  +------------------------------
- *	商品控制 器22
+ *	商品控制器
  +------------------------------
  */
 class Product extends Front {
@@ -19,9 +19,9 @@ class Product extends Front {
 	//列表
 	function items(){
 		$p = $this -> params[0];
-		$ps = array('items','edit','del','sale', 'sale_cancle', 'soldout', 'soldout_cancle', 'sale_cancle_multi', 'del_multi','pics','pic_del','pic_confirm','pic_del_multi','pic_confirm_multi','pic_local_del','pic_local_del_multi');
+		$ps = array('items','edit','del','sale', 'sale_cancle', 'soldout', 'soldout_cancle', 'sale_cancle_multi', 'del_multi','pics');
 		if (!in_array($p, $ps)){$p = 'items';}
-
+		
 		$product = new product\product();
 		$product -> $p();
 	}

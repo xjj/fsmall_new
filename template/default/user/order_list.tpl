@@ -17,6 +17,7 @@
 		<{include file="user/navbar.tpl"}>
 	</div>
 	<div class="mainbox">
+    	<div class="user-title">我的订单</div>
 		<div class="order-search clearfix">
 			<div class="y">
 			<FORM name="order-form" id="orderForm" method="get" action="/order">

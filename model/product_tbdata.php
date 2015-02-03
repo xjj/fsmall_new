@@ -22,6 +22,16 @@ class Product_tbdata extends front {
 	
 /*------------------------分割线 下面的是无用的 可删----------------*/
 	
+	//删除断货信息
+	function delete($prd_id){
+		return $this -> db -> update('product_soldout', array(
+			'is_delete' => 1, 
+			'delete_time' => time()
+		), array(
+			'prd_id' => $prd_id,
+			'is_delete' => 0
+		));
+	}
 	
 	//查询断货商品列表
 	function search($params, $page, $pagesize){

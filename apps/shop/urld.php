@@ -4,19 +4,10 @@ use model as md;
 if (!defined('START')) exit('No direct script access allowed');
 /**
  +----------------------------
- *	抓图 控制器 author:xjj
+ *	抓图 控制器
  +----------------------------
  */
 class Urld extends Front {
-	//图片下载目录
-    public $_save_dir = UPLOAD_PATH;
-	
-	//基础目录
-	public $_base_dir = '';
-	//图片地址
-	public $_base_url = IMG_SERVER;
-	public $_callback = 'http://img2.fs-mall.com/tools/download/tb_callback.php';
-	
 	//分析链接正则 每个品牌可加多个正则 正则为商品链接页的地址  
  	public $mapping = array(
 		//shezgood
@@ -26,6 +17,8 @@ class Urld extends Front {
 			'brand'=>'shezgood',
 			'brand_id' => 1
 		),
+		//cherryspoon
+		//http://www.cherryspoon.co.kr/product/detail.html?product_no=14222&cate_no=32&display_group=1
 		array(
 			'pattern'=>"/cherry(?:\-)?spoon[^\/]+\/front\/php\/product\.php\?product_no=([\d]+)/i", 
 			'file'=>'brands/cherryspoon.php', 
@@ -234,6 +227,8 @@ class Urld extends Front {
 			'brand_id' => 113
 		),
 		//loveloveme
+		//http://www.loveloveme.com/product/detail.html?product_no=14809&cate_no=24&display_group=1
+		//'pattern'=>"/loveloveme\.com\/front\/php\/product\.php\?product_no=([\d]+)/i", 
 		array(
 			'pattern'=>"/loveloveme\.com\/product\/detail\.html\?product_no=([\d]+)/i", 
 			'file'=>'brands/loveloveme.php', 
@@ -247,7 +242,7 @@ class Urld extends Front {
 			'brand'=>'eranzi',
 			'brand_id' => 115
 		),
-		//pinkboll  
+		//pinkboll  http://www.pinkboll.co.kr/product/detail.html?product_no=17123&cate_no=30&display_group=1
 		array(
 			'pattern'=>"/pinkboll\.co\.kr\/product\/detail\.html\?product_no=([^&]+)/i", 
 			'file'=>'brands/pinkboll.php', 
@@ -282,6 +277,8 @@ class Urld extends Front {
 			'brand_id' => 119,
 		),
 		//yubsshop
+		//http://yubsshop.com/product/detail.html?product_no=27637&cate_no=12&display_group=1
+		///yubsshop\.com\/Front\/Product\/\?url=Product&product_no=([^&]+)/i
 		array(
 			'pattern' => "/yubsshop\.com\/product\/detail\.html\?product_no=([^&]+)/i",
 			'file' => 'brands/yubsshop.php',
@@ -289,6 +286,7 @@ class Urld extends Front {
 			'brand_id' => 120,
 		),
 		//wingsgirl
+		//http://www.wingsgirl.co.kr/product/detail.html?product_no=21193&cate_no=135&display_group=1
 		array(
 			'pattern' => "/wingsgirl\.co\.kr\/product\/detail\.html\?product_no=([\d]+)/i",
 			'file' => 'brands/wingsgirl.php',
@@ -302,21 +300,21 @@ class Urld extends Front {
 			'brand' => 'wingsmall',
 			'brand_id' => 122,
 		),
-		//styleforman 
+		//styleforman  http://www.styleforman.co.kr/shop/shopdetail.html?branduid=990&xcode=001&mcode=003&scode=001&special=3
 		array(
 			'pattern' => "/styleforman\.co\.kr\/shop\/shopdetail\.html\?branduid=([\d]+)/i",
 			'file' => 'brands/styleforman.php',
 			'brand' => 'styleforman',
 			'brand_id' => 123,
 		),
-		#urbanholic
+		#http://www.urbanholic.co.kr/product/detail.html?product_no=2316&cate_no=1&display_group=3
 		array(
 			'pattern' => "/urbanholic\.co\.kr\/product\/detail\.html\?product_no=([\d]+)/i",
 			'file' => 'brands/urbanholic.php',
 			'brand' => 'urbanholic',
 			'brand_id' => 124,
 		),
-		#vivaruby
+		#http://www.vivaruby.co.kr/product/detail.html?product_no=1893&cate_no=1&display_group=3
 		array(
 			'pattern' => "/vivaruby\.co\.kr\/product\/detail\.html\?product_no=([\d]+)/i",
 			'file' => 'brands/vivaruby.php',
@@ -337,7 +335,7 @@ class Urld extends Front {
 			'brand' => 'shescoming',
 			'brand_id' => 127,
 		),
-		//lagirl 
+		//lagirl http://lagirl.co.kr/product/detail.html?product_no=6056&cate_no=1&display_group=2
 		array(
 			'pattern' => "/lagirl\.co\.kr\/product\/detail\.html\?product_no=([\d]+)/",
 			'file' => 'brands/lagirl.php',
@@ -351,7 +349,7 @@ class Urld extends Front {
 			'brand_id' => 129,
 		),
 		array(
-			'pattern' => "/minsshop\.com\/Front\/Product\/\?url=Product&product_no=([\s\S]+)/i",
+			'pattern' => "/minsshop\.com\/Front\/Product\/\?url=Product&product_no=([\s\S]+)/i",///?url=Product&product_no=SFSELFAA0002236
 			'file' => 'brands/minsshop.php',
 			'brand' => 'minsshop',
 			'brand_id' => 129,
@@ -387,19 +385,19 @@ class Urld extends Front {
 			'brand_id' => 133,
 		),
 		array(
-			'pattern' => "/chocostars\.co\.kr\/product\/detail\.html\?product_no=([\d]+)/",   
+			'pattern' => "/chocostars\.co\.kr\/product\/detail\.html\?product_no=([\d]+)/",   //http://chocostars.co.kr/product/detail.html?product_no=907&cate_no=1&display_group=7
 			'file' => 'brands/chocostars.php',
 			'brand' => 'chocostars',
 			'brand_id' => 135,
 		),
 		array(
-			'pattern' => "/marsh-mallow\.co\.kr\/product\/detail\.html\?product_no=([\d]+)/",   
+			'pattern' => "/marsh-mallow\.co\.kr\/product\/detail\.html\?product_no=([\d]+)/",   //http://www.marsh-mallow.co.kr/product/detail.html?product_no=14025&cate_no=1&display_group=2
 			'file' => 'brands/Marsh-mallow.php',
 			'brand' => 'Marsh-mallow',
 			'brand_id' => 136,
 		),
 		array(
-			'pattern' => "/soim\.co\.kr\/shop\/shopdetail\.html\?branduid=([\d]+)/",   
+			'pattern' => "/soim\.co\.kr\/shop\/shopdetail\.html\?branduid=([\d]+)/",   //http://www.soim.co.kr/shop/shopdetail.html?branduid=68451
 			'file' => 'brands/Soim.php',
 			'brand' => 'Soim',
 			'brand_id' => 137,
@@ -412,30 +410,35 @@ class Urld extends Front {
 		),
 		array(
 			'pattern' => "/high-eny\.co\.kr\/product\/detail\.html\?product_no=([\d]+)/",
+			//http://www.high-eny.co.kr/product/detail.html?product_no=10656&cate_no=1&display_group=3
 			'file' => 'brands/High-eny.php',
 			'brand' => 'High-eny',
 			'brand_id' => 139,
 		),
 		array(
 			'pattern' => "/hotping\.co\.kr\/product\/detail\.html\?product_no=([\d]+)/",
+			//http://hotping.co.kr/product/detail.html?product_no=2532&cate_no=25&display_group=
 			'file' => 'brands/hotping.php',
 			'brand' => 'Hotping',
 			'brand_id' => 140,
 		),
 		array(
 			'pattern' => "/kanchogirl\.com\/shop\/shopdetail\.html\?branduid=([\d]+)/",
+			//http://www.kanchogirl.com/shop/shopdetail.html?branduid=926993&xcode=009&mcode=003&scode=&special=3&GfDT=bm53UFw%3D
 			'file' => 'brands/kanchogirl.php',
 			'brand' => 'Kanchogirl',
 			'brand_id' => 141,
 		),
 		array(
 			'pattern' => "/09women\.com\/shop\/shopdetail\.html\?branduid=([\d]+)/",
+			//http://www.09women.com/shop/shopdetail.html?branduid=48331&special=1&GfDT=Z2t3UF8%3D
 			'file' => 'brands/09women.php',
 			'brand' => '09women',
 			'brand_id' => 142,
 		),
 		array(
 			'pattern' => "/instylefit\.com\/product\/detail.html\?product_no=([\d]+)/",
+			//http://www.09women.com/shop/shopdetail.html?branduid=48331&special=1&GfDT=Z2t3UF8%3D
 			'file' => 'brands/instylefit.php',
 			'brand' => 'instylefit',
 			'brand_id' => 143,
@@ -448,6 +451,7 @@ class Urld extends Front {
 		),
 		array(
 			'pattern' => "/soo-a\.co\.kr\/shop\/shopdetail\.html\?branduid=([\s\S]+)/",
+			//http://www.soo-a.co.kr/shop/shopdetail.html?branduid=147689
 			'file' => 'brands/soo-a.php',
 			'brand' => 'soo-a',
 			'brand_id' => 145,
@@ -471,7 +475,6 @@ class Urld extends Front {
 			$this -> get_pics();
 			exit();
 		}
-		
 		$brand = new md\brand();
 		$data = $brand -> items(1); 
 		$tboauth_status= $this->gettbauth_status();
@@ -486,7 +489,7 @@ class Urld extends Front {
 		$msg='';
 		//判断是否超过5000次
 		$product_pics = new md\product_pics();
-		$data = $product_pics -> search(array('add_time'=> 1));
+		$data = $product_pics -> search(array('timeline'=> 1));
 		$counts =$data['num'];
 		if ($counts >= 4995){
 			$msg.= '淘宝空间API调用次数已达到5000次，已经超出了调用限制。<br />';
@@ -504,7 +507,7 @@ class Urld extends Front {
 		$url= trim($_REQUEST['url']);
 		if (!empty($url)){
 			$product = new md\product();
-			$data = $product -> search_by_array(array('kr_url'=>$url));
+			$data = $product -> search_by_array(array(kr_url=>$url));
 			$num= intval($data['total']);
 			$goods_id= $data['items'][0]['prd_id'] ;
 			if ($num <= 0){
@@ -514,33 +517,33 @@ class Urld extends Front {
 					$msg.=  '如果图片抓取错误，请联系我，如果有黑图请重新抓取，如果抓两次都抓不到，请移动到手动上传那里。';
 					$msg.=  '<br />';
 				}
-				//抓取操作 遍历 找到对应的品牌 匹配地址
+				//抓取操作
+				$_save_dir = IMG_SERVER;
 				$flag = 0;
 				foreach($this->mapping as $item){
 					$pattern = $item['pattern'];
 					$brand = $item['brand'];
 					$brand_id = $item['brand_id'];
+					$pattern_file = dirname(__FILE__).'/'.$item['file'];//CONTROLLER_PATH.
 					$r = preg_match($pattern, $url, $matches);
 					if ($r){
 						$flag = 1;
 						//设置图片保存位置
-						$saveDir = $this->_save_dir."/details/".$brand."/".date('Y/md');///
+						$saveDir = $_save_dir."/details/".$brand."/".date('Y/md');
 						//创建文件夹
-						$dir1 = $this->_save_dir.'/details';
+						$dir1 = $_save_dir.'/details';
 						$dir2 = $dir1.'/'.$brand;
 						$dir3 = $dir2.'/'.date('Y');
 						$dir4 = $dir3.'/'.date('md');
-						
-						if(!is_dir($dir1)){ $r2= mkdir($dir1, 0777, true);}
+						!is_dir($dir1) && mkdir($dir1, 0777, true);
 						!is_dir($dir2) && mkdir($dir2, 0777, true);
 						!is_dir($dir3) && mkdir($dir3, 0777, true);
-						!is_dir($dir4) && $rm=mkdir($dir4, 0777, true);
-						//dump($dir1);dump($r2);
-						//抓取图片 每个品牌对应一个方法
-						$funname=  downLarge_.$brand_id;
-						if(!method_exists($this,$funname)){
-							$msg.=  '错误：此品牌对应的抓图函数未定义！';
+						!is_dir($dir4) && mkdir($dir4, 0777, true);
+						if(!is_file($pattern_file)){
+							$msg.=  '错误：图片匹配文件不存在！';
 						} else {
+							//抓取图片 每个品牌对应一个方法
+							$funname=  downLarge_.$brand_id;
 							$ret =$this->$funname($url, $saveDir, $goods_id);//获得文件名
 							if($ret == -1){
 								$msg.=  "获取文章内容失败";
@@ -552,9 +555,10 @@ class Urld extends Front {
 							elseif ($ret == -3){
 								$msg.=  "未能抓取到源网页 可能商品断货或IP被屏蔽 ";
 							}elseif (is_array($ret)){
+		
 								$msg.=  '<a href="http://www.fs-mall.com/goods.php?id='.$goods_id.'" target="_blank">点击这里查看商品图片抓取情况，图片下载可能有几秒的延迟。</a><br />';
 								foreach($ret as $file){
-									$file = str_replace($this->_save_dir, $this->_base_url, $file);
+									$file = str_replace($_save_dir, $_base_url, $file);
 									$msg.=  "{$file}<br />";
 								}
 							} else {
@@ -575,208 +579,29 @@ class Urld extends Front {
 		$this -> smarty ->assign('msg',$msg);
 		$this -> smarty -> display('urld.tpl');
 	}
-	
-	//图片下载完成后的处理
-	function dopic(){
-		$goods_id = intval($_REQUEST['goods_id']);
-		
-		if (empty($goods_id)){
-			exit('错误的商品id');
-		}
-		
-		$filepath = urldecode($_REQUEST['filepath']);
-		if (empty($filepath) || !file_exists($filepath)){
-			exit('错误的图片地址');
-		}
-		
-		$filepath = str_replace(' ', '%20', $filepath);
-		
-		//更新图片状态为已下载
-		$r= $this->updateFileStatus($filepath, $goods_id, 1);
-		
-
-		//图片裁切
-		$img = new doimage();
-		$img -> thumb($filepath, 1000);
-		$ret = $img -> crop($filepath, 4000);
-		
-		$number = 1;
-		//更新图片状态为已裁切 2
-		if ($ret) {
-			$r2=$this->updateFileInfo(array(
-				'filePath' => $filepath,
-				'goods_id' => $goods_id,
-				'number' => $ret['number'],
-				'width' => $ret['width'],
-				'height' => $ret['height'],
-			));
-			$number = $ret['number'];
-		}
-		//调用淘宝API上传图片  key需要跟授权的那个一致 才能上传 
-		$taobao = new taobaooauth();
-		//获取并设置access_token[sessonKey]
-		$info = $taobao -> get_access_token();
-		if ($info){
-			$rt = $taobao -> upload($filepath);
-			if (isset($rt['picture_upload_response'])){
-				$pic_tb = $rt['picture_upload_response']['picture']['picture_path'];
-				$pic_tb_id = $rt['picture_upload_response']['picture']['picture_id'];
-				//更改为3
-				$r3= updateFileTaobao($filepath, $goods_id, $pic_tb, $pic_tb_id);
-				
-			} else {
-				print_r($rt);
-				exit();
-			}
-			
-			//上传截图
-			if ($number > 1){
-				for ($i = 0; $i < $number; $i++){
-					$basedir  = dirname($filepath);
-					$basename = basename($filepath);
-					$newpath  = $basedir.'/'.str_replace('.jpg','-'.$i.'.jpg', $basename);
-					$rt = $taobao -> upload($newpath);
-					if (isset($rt['picture_upload_response'])){
-						$pic2_tb = $rt['picture_upload_response']['picture']['picture_path'];
-						$pic2_tb_id = $rt['picture_upload_response']['picture']['picture_id'];
-						//裁切后是多张图的 插入 状态4
-						insertFileTaobao(array(
-							'filePath' => $newpath,
-							'goods_id' => $goods_id,
-							'pic_tb' => $pic2_tb,
-							'pic_tb_id' => $pic2_tb_id,
-							'pic_tb_pid' => $pic_tb_id
-						));
-					} else {
-						print_r($rt);
-					}		
-				}
-			}
-		}else{
-				file_put_contents(UPLOAD_PATH.'/test.txt', var_export($info,true),FILE_APPEND);
-
-		}
-		
-	}
-
-	/*批量保存到数据库
-		---$data = array($sourcePic, $filePath, $goods_id);	
+	//批量保存到数据库
+	/******---$data = array($sourcePic, $filePath, $goods_id);
 	*/
 	function save_file_multi($data){
 		$product_pics = new md\product_pics();
+		global $_save_dir;
 		$sql_insert = 'INSERT INTO `product_pics` (`prd_id`, `pic_wb`, `pic_fs`, `pic_tb`, `add_time`, `status`, `is_delete`) VALUES ';
 		$or = '';
 		$dt = '';
 		foreach ($data as $item){
-			
-			$filePath = str_replace($this->_save_dir, $this->_base_url,$item['filePath']  );//???
-			
+			$filePath = str_replace($_save_dir.'/', '', $item['filePath']);
 			$goods_id = $item['goods_id'];
 			$sourcePic = trim($item['sourcePic']);
-			$sourcePic = str_replace('&amp;', '&', $sourcePic);//
+			$sourcePic = str_replace('&amp;', '&', $sourcePic);
 			$sql_update = 'UPDATE `product_pics` SET is_delete = 1 WHERE `prd_id` = \''.$goods_id.'\'';
 			$or = ' OR ';
 			$sql_insert .= $dt.' (\''.$goods_id.'\', \''.encode($sourcePic).'\', \''.encode($filePath).'\', \'\', '.time().', 0, 0) ';
 			$dt = ' , ';
 		}
 		$r= $this -> db->query($sql_update);
-		#echosqlerr();
 		$r2= $this ->db->query($sql_insert); // 先改后插
-		#echosqlerr();
-		#dump($r);dump($r2);dump($sql_update);
 	}
-	//保存到数据库 单个  这个没用   
-	function saveFileToDB($sourcePic, $filePath, $goods_id){
-		$product_pics = new md\product_pics();
-		$filePath = str_replace($this->_save_dir.'/', '', $filePath);
-		
-		$product_pics -> update( array('is_delete' => 1), array(
-			'prd_id' => $goods_id,
-			'pic_wb' => $sourcePic
-		));
-		
-		$pid =$product_pics -> insert( array(
-			'prd_id' => $goods_id,
-			'pic_wb' => $sourcePic,
-			'pic_fs' => $filePath,
-			'pic_tb' => '',
-			'add_time' => time(),
-			'status' => 0,
-			'is_delete' => 0
-		));
-		return $pid;
-	}
-	//更新图片已下载
-	function updateFileStatus($filePath, $goods_id,$status=1){
-		$status = intval($status);
-		
-		$goods_id = intval($goods_id);
-		$filePath = str_replace($this->_save_dir.'/', '', $filePath);
-		$pic_fs = trim($filePath);
-		$is_delete = 0;
-		
-		$product_pics= new md\product_pics();
-		return $product_pics-> update(array('add_time' => time(),'status' => $status),array(
-			'prd_id' => $goods_id,
-			'pic_fs' => $filePath,
-			'is_delete' => $is_delete
-		));
-	}
-	//更新图片信息
-	function updateFileInfo($data){
-		$filePath = $data['filePath'];
-		$filePath = str_replace($this->_save_dir.'/', '', $filePath);
-		$product_pics= new md\product_pics();
-
-		return $product_pics -> update( array(
-			'add_time' => time(),
-			'status' => 2,
-			'width' => $data['width'],
-			'height' => $data['height'],
-			'number' => $data['number']
-		), array(
-			'prd_id' => $data['goods_id'],
-			'pic_fs' => $filePath,
-			'is_delete' => 0
-		));
-	}
-	
-	//更新图片已上传
-	function updateFileTaobao($filePath, $goods_id, $pic_tb, $pic_tb_id){
-		
-		$filePath = str_replace($this->_save_dir.'/', '', $filePath);
-				$product_pics= new md\product_pics();
-
-		//更新图片状态 -- 已下载
-		return $product_pics -> update( array(
-			'add_time' => time(),
-			'status' => 3,
-			'pic_tb' => $pic_tb,
-			'pic_tb_id' => $pic_tb_id
-		), array(
-			'prd_id' => $goods_id,
-			'pic_fs' => $filePath,
-			'is_delete' => 0
-		));
-	}
-	
-	function insertFileTaobao($data){
-		$filePath = str_replace($this->_save_dir.'/', '', $data['filePath']);
-						$product_pics= new md\product_pics();
-
-		//更新图片状态 -- 已下载
-		return $product_pics-> insert( array(
-			'add_time' => time(),
-			'status' => 4,
-			'pic_tb' => $data['pic_tb'],
-			'pic_tb_id' => $data['pic_tb_id'],
-			'pic_tb_pid' => $data['pic_tb_pid'],
-			'pic_fs' => $filePath,
-			'prd_id' => $data['goods_id'],
-			'is_delete' => 0
-		));
-	}
-	//下载分配函数 遍历执行  
+	//下载分配函数
 	function downFile($sourceUrl, $filePath, $goods_id){
 		$data = "{$filePath}|{$sourceUrl}|{$goods_id}";
 		$ports = array(
@@ -785,21 +610,16 @@ class Urld extends Front {
 			9120,9121,9122,9123,9124,9125,9126,9127,9128,9129
 		);
 		$index = array_rand($ports);
-		$port = $ports[0]; 
+		$port = $ports[$index]; 
 		$srv = 'udp://127.0.0.1:'.$port;
 		$errno = 0;
 		$errstr = '';
 		$timeout = 300;
 		$socket = stream_socket_client($srv, $errno, $errstr, $timeout);
-		//dump($socket);
 		if ($socket) {
 			stream_set_timeout( $socket, $timeout);
-			$r= fwrite( $socket, $data);
-			
+			fwrite( $socket, $data);
 			fclose( $socket);
-		}else{
-			echo "ERROR: $errno - $errstr<br />\n";	
-			//die;
 		}
 	}
 		/*
@@ -832,36 +652,6 @@ class Urld extends Front {
         return $tmpInfo;
 	}
 	/*--------各品牌下载函数--------*/
-	function downLarge_73($sourceHtmlUrl, $saveDir, $goods_id){
-		$contents = file_get_contents($sourceHtmlUrl);
-		if(strlen($contents)==0) return;
-		$patternBigs = "/<IMG\s*src=\"(http:\/\/pinksecret\.co\.kr\/web\/img[^\"]+)\">/i";
-		preg_match_all($patternBigs, $contents,$matcheBigs);
-		if(count($matcheBigs[1])==0) return;
-		$i = 0;
-		$filenames = array();
-		$data = array();
-		foreach($matcheBigs[1] as $val){
-			$filename = $saveDir.'/'.date('His').'-'.$goods_id.'-no'.$i.'.jpg';/////
-			$filenames[] = $filename;//
-			$data[] = array(
-				'goods_id' => $goods_id,
-				'sourcePic' => $val,
-				'filePath' => $filename
-			);
-			$i += 1;
-		}
-		if (!empty($data)){
-			$this-> save_file_multi($data);//保存
-			foreach ($data as $item){
-				$sourcePic = $item['sourcePic'];
-				$filename = $item['filePath'];
-				$r= $this->downFile($sourcePic, $filename, $goods_id);//下载
-			}
-		}
-		return $filenames;
-	}
-	
 	function downLarge_142($sourceHtmlUrl, $saveDir, $goods_id){
 		$contents = file_get_contents($sourceHtmlUrl);
 		if(strlen($contents)==0) return(-1);
@@ -887,6 +677,35 @@ class Urld extends Front {
 		if (!empty($data)){
 			$this->save_file_multi($data);
 			
+			foreach ($data as $item){
+				$sourcePic = $item['sourcePic'];
+				$filename = $item['filePath'];
+				$this->downFile($sourcePic, $filename, $goods_id);
+			}
+		}
+		return $filenames;
+	}
+	function downLarge_73($sourceHtmlUrl, $saveDir, $goods_id){
+		$contents = file_get_contents($sourceHtmlUrl);
+		if(strlen($contents)==0) return;
+		$patternBigs = "/<IMG\s*src=\"(http:\/\/pinksecret\.co\.kr\/web\/img[^\"]+)\">/i";
+		preg_match_all($patternBigs, $contents,$matcheBigs);
+		if(count($matcheBigs[1])==0) return;
+		$i = 0;
+		$filenames = array();
+		$data = array();
+		foreach($matcheBigs[1] as $val){
+			$filename = $saveDir.'/'.date('His').'-'.$goods_id.'-no'.$i.'.jpg';
+			$filenames[] = $filename;
+			$data[] = array(
+				'goods_id' => $goods_id,
+				'sourcePic' => $val,
+				'filePath' => $filename
+			);
+			$i += 1;
+		}
+		if (!empty($data)){
+			$this-> save_file_multi($data);
 			foreach ($data as $item){
 				$sourcePic = $item['sourcePic'];
 				$filename = $item['filePath'];
