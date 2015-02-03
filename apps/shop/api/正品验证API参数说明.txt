@@ -1,0 +1,8 @@
+$_POST['appid']
+
+$_POST['appkey']
+
+$_POST['barcode']
+
+
+status  -1  ÓĞ´íÎó  

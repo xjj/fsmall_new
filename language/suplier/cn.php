@@ -1,0 +1,123 @@
+<?php
+/**
+ +------------------------------------
+ *	中文
+ +------------------------------------
+ */
+
+$LANG = array();
+$LANG['TITLE'] = '非尚供应商管理中心';
+$LANG['LOGIN'] = '登录';
+$LANG['USERNAME'] = '用户名';
+$LANG['PASSWORD'] = '密码';
+$LANG['SUBMIT'] = '提交';
+$LANG['LOGOUT'] = '退出';
+$LANG['PROFILE'] = '用户资料';
+$LANG['ACCOUNT'] = '账目';
+$LANG['WELCOME'] = '欢迎';
+$LANG['OPERATE'] = '操作';
+
+$LANG['PRODUCT_ORDER_SN'] = '订单号';
+$LANG['PRODUCT_NAME'] = '商品名称';
+$LANG['PRODUCT_SN'] = '商品编号';
+$LANG['PRODUCT_BARCODE'] = '条形码';
+$LANG['PRODUCT_STATUS'] = '商品状态';
+$LANG['PRODUCT_STATUS_ALL'] = '所有';
+$LANG['PRODUCT_STATUS_UNDO'] = '未处理的';
+$LANG['PRODUCT_STATUS_DONE'] = '已发送的';
+$LANG['PRODUCT_STATUS_CANCLE_USER'] = '客户取消的';
+$LANG['PRODUCT_STATUS_CANCLE_KR'] = '韩方取消的';
+$LANG['PRODUCT_PRICE'] = '商品价格';
+$LANG['PRODUCT_PRICE_DISCOUNT'] = '折扣价';
+$LANG['PRODUCT_NUMBER'] = '商品数量';
+$LANG['PRODUCT_ATTRIBUTE'] = '商品属性';
+$LANG['PRODUCT_SHIPPING_NAME'] = '配送方式';
+$LANG['PRODUCT_SHIPPING_NUMBER'] = '配送单号';
+$LANG['PRODUCT_ADDTIME'] = '下单时间';
+$LANG['PRODUCT_SENDTIME'] = '发货时间';
+$LANG['PRODUCT_CANCLETIME'] = '取消时间';
+$LANG['PRODUCT_UNIT'] = '件';
+
+
+$LANG['STATUS_UNDO'] = '未处理';
+$LANG['STATUS_SENT'] = '已发货';
+$LANG['STATUS_SOLDOUT'] = '已断货';
+$LANG['STATUS_CANCLE'] = '已取消';
+$LANG['STATUS_REFUND'] = '已退货';
+$LANG['STATUS_CANCLE_KR'] = '韩方取消';
+$LANG['STATUS_CANCLE_USER'] = '客户取消';
+
+$LANG['OPERATE_CANCLE'] = '取消';
+$LANG['OPERATE_SEND'] = '发货';
+$LANG['OPERATE_PRINT_BARCODE'] = '打印条码';
+$LANG['OPERATE_DOWNLOAD_RESULT'] = '下载结果';
+
+
+$LANG['COMPANY_NAME'] = '公司名称';
+$LANG['COMPANY_ADDRESS'] = '公司地址';
+$LANG['COMPANY_TELPHONE'] = '联系电话';
+$LANG['COMPANY_BANK_NAME'] = '开户银行';
+$LANG['COMPANY_BANK_USERNAME'] = '开户名';
+$LANG['COMPANY_BANK_NUMBER'] = '卡号';
+
+$LANG['USER_PASSWORD_CONFIRM'] = '密码确认';
+$LANG['USER_PASSWORD_NOTICE'] = '如果不修改密码，请留空！';
+
+$LANG['MESSAGE_USERNAME_EMPTY'] = '用户名不能为空';
+$LANG['MESSAGE_PASSWORD_EMPTY'] = '密码不能为空';
+$LANG['MESSAGE_PASSWORD_CONFIRM_NOT_METCHED'] = '确认密码不匹配';
+$LANG['MESSAGE_USERNAME_EXIST'] = '用户名已存在';
+$LANG['MESSAGE_UPDATE_SUCCESS'] = '更新成功';
+$LANG['MESSAGE_UPDATE_FAILED'] = '更新失败';
+
+$LANG['MESSAGE_LOGIN_REQUIRED'] = '请登录，先！';
+$LANG['MESSAGE_CANCLE_CONFIRM'] = '确认要取消该订单吗？';
+$LANG['MESSAGE_CANCLE_NOT_EXIST'] = '要取消的订单不存在';
+$LANG['MESSAGE_CANCLE_FAILED'] = '订单取消失败';
+$LANG['MESSAGE_CANCLE_UNABLED'] = '该订单不可执行此操作';
+
+
+$LANG['MESSAGE_SEND_SUCCESS'] = '发货成功';
+$LANG['MESSAGE_SEND_FAILED'] = '发货失败';
+$LANG['MESSAGE_SEND_ORDER_ERROR'] = '订单信息错误';
+$LANG['MESSAGE_SEND_ORDER_NOT_EXIST'] = '订单不存在';
+$LANG['MESSAGE_SEND_ORDER_STATUS_ERROR'] = '订单的当前状态错误';
+
+
+$LANG['SEND_STEP_1'] = '第一步：确认订单信息';
+$LANG['SEND_STEP_2'] = '第二步：确认收件人信息';
+$LANG['SEND_STEP_3'] = '第三步：填写运单号发货';
+$LANG['SEND_SUBMIT'] = '发货';
+$LANG['SEND_SUBMIT_CONFIRM'] = '确定要发货吗？';
+$LANG['SEND_SHIPPING_NUMBER_EMPTY'] = '请填写物流编号';
+
+
+$LANG['POP_BUTTON_YES'] = '确定';
+$LANG['POP_BUTTON_NO'] = '取消';
+$LANG['POP_TITLE'] = '消息';
+
+$LANG['ACCOUNT_DATETIME'] = '日期';
+$LANG['ACCOUNT_NUMBER'] = '数量';
+$LANG['ACCOUNT_AMOUNT'] = '金额';
+$LANG['ACCOUNT_DETAIL'] = '详细';
+
+$LANG['DOWNLOAD_ORDER_SN'] = '订单号';
+$LANG['DOWNLOAD_PRODUCT_NAME'] = '商品名称';
+$LANG['DOWNLOAD_PRODUCT_NAME_CN'] = '中文名称';
+$LANG['DOWNLOAD_PRODUCT_SN'] = '商品编号';
+$LANG['DOWNLOAD_PRODUCT_ATTRIBUTE'] = '商品属性';
+$LANG['DOWNLOAD_PRODUCT_NUMBER'] = '数量';
+$LANG['DOWNLOAD_PRODUCT_PRICE'] = '价格';
+$LANG['DOWNLOAD_PRODUCT_BARCODE'] = '条形码';
+
+$LANG['DOWNLOAD_SHIPPING_NAME'] = '配送方式';
+$LANG['DOWNLOAD_SHIPPING_NUMBER'] = '配送单号';
+$LANG['DOWNLOAD_CONSIGNEE'] = '收货人';
+$LANG['DOWNLOAD_ADDRESS'] = '收货地址';
+$LANG['DOWNLOAD_TELPHONE'] = '联系电话';
+$LANG['DOWNLOAD_ZIPCODE'] = '邮编';
+$LANG['DOWNLOAD_ORDER_TIME'] = '邮编';
+$LANG['DOWNLOAD_SEND_TIME'] = '邮编';
+
+
+return $LANG;
